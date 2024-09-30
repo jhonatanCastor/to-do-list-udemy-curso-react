@@ -1,10 +1,10 @@
 import { Container } from "../components/Container";
-import { CreateNewtask } from "../components/CreateNewTask";
+import { ServicesTask } from "../components/ServicesTask";
 
 export default function New() {
   return (
     <Container>
-      <CreateNewtask/>
+      <ServicesTask/>
     </Container>
   )
 }

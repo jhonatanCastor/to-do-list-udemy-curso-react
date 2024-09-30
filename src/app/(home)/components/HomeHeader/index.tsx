@@ -1,20 +1,11 @@
 
 'use client'
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import Link from "next/link";
 import { Container } from '../Container';
 
 export function HomeHeader() {
-
-  const [userId, setUserId] = useState('');
-
-  useEffect(() => {
-    const userId = localStorage.getItem('userId');
-    if (userId) {
-      setUserId(userId);
-    }
-  }, []);
 
   return (
     <Container>
