@@ -1,5 +1,6 @@
 'use client'
 import { api } from "@/app/lib/api";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { NextResponse } from "next/server";
 import { useEffect, useState } from "react";
@@ -13,7 +14,7 @@ interface TaskProps {
 }
 
 const ListComponentTasks = () => {
-  const [task, setTask] = useState<TaskProps[] | null>([]);
+  const [task, setTask] = useState<TaskProps[] | null>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -39,27 +40,39 @@ const ListComponentTasks = () => {
 
     router.refresh();
   }
+
+  function changeColorStatus(status: string): string {
+    const statusColorMap: Record<string, string> = {
+      PENDING: 'bg-yellow-600',
+      DONE: 'bg-green-600',
+      CLOSE: 'bg-red-600',
+      DOING: 'bg-blue-600',
+      REVIEW: 'bg-pink-600'
+    };
+  
+    return statusColorMap[status] || 'bg-yellow-600'; 
+  }
   
   return (
     <div className="">
-      <div className="flex flex-col">
+      <div className="flex flex-col justify-center">
         <h1 className="text-4xl font-semibold mb-4">Tarefas do dia</h1>
         
-        <div className="flex gap-4 flex-col md:flex-row">
+        <div className={task && task?.length > 3 ? "flex gap-4 flex-wrap" : "flex gap-4 flex-col md:flex-row"}>
 
-          {task?.map((data) => (
-            <div key={data.id} className="flex p-3 flex-col bg-gray-200 border border-gray-400 w-[450px] rounded">
+          {Array.isArray(task) && task?.map((data) => (
+            <div key={data.id} className="flex p-2 flex-col bg-gray-200 border border-gray-400 w-full rounded">
               <div className="flex items-center justify-between  gap-2">
-                <h2 className="bg-yellow-600  px-4 rounded font-semibold text-white">{data.status}</h2>
+                <h2 className={`${changeColorStatus(data.status)} py-1 px-4 rounded font-semibold text-white`}>{data.status}</h2>
 
                 <div className="flex items-center gap-2">
                   <button>
                     <FiCheckSquare size={24} color='#44ef7d'/>
                   </button>
 
-                  <button>
+                  <Link href={`/${data.id}/update`}>
                     <FiFile size={24} color='#3b82f6'/>
-                  </button>
+                  </Link>
 
                 </div>
               </div>
@@ -72,18 +85,16 @@ const ListComponentTasks = () => {
 
               <div className="">
                 <p className="text-lg text-black font-bold">Descrição</p>
-                <p className="text-lg text-black">{data.description}</p>
+                <p className="text-black">{data.description}</p>
               </div>
 
-              <div className="flex justify-end">
+              <div className="flex justify-end mt-2">
                 <button onClick={() => deletedTask(data.id)} className="font-semibold py-1 px-4 bg-red-600 w-20 rounded">
                   Delete
                 </button>
               </div>
             </div>
-          ))
-            
-          }
+          ))}
 
         </div>
 

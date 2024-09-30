@@ -26,48 +26,76 @@ export async function POST(request: Request) {
     } 
 }
 
-export async function GET() {
-  
-  try {
-    const response = await prismaClient.task.findMany()
-    return NextResponse.json(response);
-    
-   }catch(err) {
-    return NextResponse.json({error: "Failed create new task"})
-  } 
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const taskId = searchParams.get("id");
+
+  if (taskId) {
+    try {
+      const findTask = await prismaClient.task.findFirst({
+        where: {
+          id: taskId
+        }
+      });
+
+      if (!findTask) {
+        return NextResponse.json({ error: "Task não encontrada" }, { status: 404 });
+      }
+
+      return NextResponse.json(findTask);
+    } catch (err) {
+      return NextResponse.json({ error: "Falha ao buscar task" }, { status: 500 });
+    }
+  } else {
+    // Busca de todas as tasks
+    try {
+      const tasks = await prismaClient.task.findMany();
+      return NextResponse.json(tasks);
+    } catch (err) {
+      return NextResponse.json({ error: "Falha ao buscar tasks" }, { status: 500 });
+    }
+  }
 }
 
 export async function PUT(request: Request) {
+  console.log('hehehehehehheheheheheheheh');
+  
+  const {searchParams} = new URL(request.url);
+  const id = searchParams.get("id");
 
-  const {id, status, name, description} = await request.json();
+  console.log("ID Taskgggggggggggggggggg", id);
+  
 
-  const findTicket = await prismaClient.task.findFirst({
-    where: {
-      id: id as string
-    }
+  if(!id){
+    return NextResponse.json({ message: "ID da tarefa não fornecido" }, { status: 400 });
+  };
+
+  const {status, name, description} = await request.json();
+
+  const findTask = await prismaClient.task.findFirst({
+    where: {id}
   });
 
-  if(!findTicket) {
-    return NextResponse.json({message: "Filed update ticket"})
+  if(!findTask) {
+    return NextResponse.json({ message: "Tarefa não encontrada" }, { status: 404 });
   };
 
-  try{
+  try {
     const response = await prismaClient.task.update({
       where: {
-        id: id as string
-      },
-      data: {
-        status: status,
-        name: name,
-        description: description
+        id: id
+      }, data:{
+        name,
+        status,
+        description
       }
     });
-
     return NextResponse.json(response);
-
-  }catch(err) {
-    return NextResponse.json({message: "Filed update ticket"})
-  };
+  }catch (err) {
+    console.error("Erro ao atualizar a tarefa:", err);
+    return NextResponse.json({ message: "Falha ao atualizar a tarefa" }, { status: 500 });
+  }
+  
 }
 
 export async function DELETE(request: Request) {
